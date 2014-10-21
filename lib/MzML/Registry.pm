@@ -10,6 +10,7 @@ use MzML::ReferenceableParamGroupList;
 use MzML::SampleList;
 use MzML::InstrumentConfigurationList;
 use MzML::SoftwareList;
+use MzML::DataProcessingList;
 
 has 'mzML' => (
     is  =>  'rw',
@@ -63,6 +64,15 @@ has 'softwareList' => (
     default => sub {
         my $self = shift;
         return my $obj = MzML::SoftwareList->new();
+        }
+    );
+
+has 'dataProcessingList' => (
+    is  =>  'rw',
+    isa =>  'MzML::DataProcessingList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::DataProcessingList->new();
         }
     );
 

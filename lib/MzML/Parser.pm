@@ -21,6 +21,9 @@ use MzML::InstrumentConfiguration;
 use MzML::SoftwareList;
 use MzML::Software;
 use MzML::SoftwareParam;
+use MzML::DataProcessingList;
+use MzML::DataProcessing;
+use MzML::ProcessingMethod;
 use XML::Twig;
 use URI;
 
@@ -37,14 +40,15 @@ sub parse {
     my $parser = XML::Twig->new(
         twig_handlers =>
         {
-            mzML                        =>  \&parse_mzml,
-            cvList                      =>  \&parse_cvlist,
-            fileContent                 =>  \&parse_filecontent,
-            sourceFileList              =>  \&parse_sourcefilelist,
-            referenceableParamGroupList =>  \&parse_refparamgroup,
-            sampleList                  =>  \&parse_samplelist,
-            instrumentConfigurationList =>  \&parse_intrconflist,
-            softwareList                =>  \&parse_softwarelist,
+            mzML                            =>  \&parse_mzml,
+            cvList                          =>  \&parse_cvlist,
+            fileContent                     =>  \&parse_filecontent,
+            sourceFileList                  =>  \&parse_sourcefilelist,
+            referenceableParamGroupList     =>  \&parse_refparamgroup,
+            sampleList                      =>  \&parse_samplelist,
+            instrumentConfigurationList     =>  \&parse_intrconflist,
+            softwareList                    =>  \&parse_softwarelist,
+            dataProcessingList              =>  \&parse_dataproclist,
         },
         pretty_print => 'indented',
     );
@@ -494,6 +498,86 @@ sub parse_softwarelist {
     $swl->software(\@list);
 
     $reg->softwareList($swl);
+
+}
+
+sub parse_dataproclist {
+    my ($parser, $node) = @_;
+
+    my @subnodes_1 = $node->children;
+    
+    my @list;
+    my @dataplist;
+
+    my $datap;
+    my $proc;
+
+    for my $el1 ( @subnodes_1 ) {
+
+        $datap = MzML::DataProcessing->new();
+        $datap->id($el1->{'att'}->{'id'});
+
+        my @subnodes_2 = $el1->children;
+
+        for my $el2 ( @subnodes_2 ) {
+
+            if ( $el2->name eq 'processingMethod' ) {
+                
+                $proc = MzML::ProcessingMethod->new();
+                $proc->order($el2->{'att'}->{'order'});
+                $proc->softwareRef($el2->{'att'}->{'softwareRef'}) if defined ($el2->{'att'}->{'softwareRef'});
+
+                my @subnodes_3 = $el2->children;
+
+                my @cvparam_list;
+                my @reference_list;
+                my @user_list;
+
+                for my $el3 ( @subnodes_3 ) {
+
+                    undef(@cvparam_list);
+                    undef(@reference_list);
+                    undef(@user_list);
+
+                    if ( $el3->name eq 'cvParam' ) {
+
+                        my $cvp = get_cvParam($el3);
+                        push(@cvparam_list, $cvp);
+
+                    } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+
+                        my $ref = get_referenceableParamGroupRef($el3);
+                        push(@reference_list, $ref);
+
+                    } elsif ( $el3->name eq 'userParam' ) {
+
+                        my $user = get_userParam($el3);
+                        push(@user_list, $user);
+
+                    }
+
+                }#end el3
+
+                $proc->cvParam(\@cvparam_list);
+                $proc->userParam(\@user_list);
+                $proc->referenceableParamGroupRef(\@reference_list);
+
+                push(@dataplist, $proc);
+
+            }
+
+        }#end el2
+
+        $datap->processingMethod(\@dataplist);
+        push(@list, $datap);
+        
+    }#end el1
+    
+    my $dpl = MzML::DataProcessingList->new();
+    $dpl->count($node->{'att'}->{'count'});
+    $dpl->dataProcessing(\@list);
+
+    $reg->dataProcessingList($dpl);
 
 }
 
