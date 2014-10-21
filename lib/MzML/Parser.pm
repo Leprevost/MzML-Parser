@@ -280,10 +280,9 @@ sub parse_samplelist {
 sub parse_intrconflist {
     my ($parser, $node) = @_;
 
-    use DDP;
-
     my @subnodes_1 = $node->children;
     my @list;
+    my @clist;
 
     for my $el ( @subnodes_1 ) {
         
@@ -292,9 +291,13 @@ sub parse_intrconflist {
         
         my @subnodes_2 = $el->children;
 
-        my @cvparam_list;
+        my $clist;
+
         my @reference_list;
-        my @user_list;
+
+        my $source;
+        my $analyzer;
+        my $detector;
 
         for my $el2 ( @subnodes_2 ) {
 
@@ -305,12 +308,141 @@ sub parse_intrconflist {
 
     		} elsif ( $el2->name eq 'componentList' ) {
 
-                say "ok";
+                undef($source);
+                undef($analyzer);
+                undef($detector);
+
+                $clist = MzML::ComponentList->new();
+                $clist->count($el2->{'att'}->{'count'});
+
+                my @subnodes_3 = $el2->children;
+
+                my (@source_cvparam_list, @analyzer_cvparam_list, @detector_cvparam_list);
+                my (@source_reference_list, @analyzer_reference_list, @detector_reference_list);
+                my (@source_user_list, @analyzer_user_list, @detector_user_list);
+
+                for my $el3 ( @subnodes_3 ) {
+                    
+                    if ( $el3->name eq 'source' ) {
+                        
+                        $source = MzML::Source->new();
+                        $source->order($el3->{'att'}->{'order'});
+
+                        my @subnodes_4 = $el3->children;
+
+                        for my $el4 ( @subnodes_4 ) {
+
+                            if ( $el4->name eq 'cvParam' ) {
+
+                                my $cvp = get_cvParam($el4);
+                                push(@source_cvparam_list, $cvp);
+
+                            } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+                                my $ref = get_referenceableParamGroupRef($el4);
+                                push(@source_reference_list, $ref);
+
+                            } elsif ($el4->name eq 'userParam' ) {
+
+                                my $user = get_userParam($el4);
+                                push(@source_user_list, $user);
+                                
+                            }
+                        }
+                        
+
+                    } elsif ( $el3->name eq 'analyzer' ) {
+
+                        $analyzer = MzML::Analyzer->new();
+                        $analyzer->order($el3->{'att'}->{'order'});
+
+                        my @subnodes_4 = $el3->children;
+
+                        for my $el4 ( @subnodes_4 ) {
+
+                            if ( $el4->name eq 'cvParam' ) {
+
+                                my $cvp = get_cvParam($el4);
+                                push(@analyzer_cvparam_list, $cvp);
+
+                            } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+                                my $ref = get_referenceableParamGroupRef($el4);
+                                push(@analyzer_reference_list, $ref);
+
+                            } elsif ($el4->name eq 'userParam' ) {
+
+                                my $user = get_userParam($el4);
+                                push(@analyzer_user_list, $user);
+                                
+                            }
+                        }
+
+                    } elsif ( $el3->name eq 'detector' ) {
+
+                        $detector = MzML::Detector->new();
+                        $detector->order($el3->{'att'}->{'order'});
+
+                        my @subnodes_4 = $el3->children;
+
+                        for my $el4 ( @subnodes_4 ) {
+
+                            if ( $el4->name eq 'cvParam' ) {
+
+                                my $cvp = get_cvParam($el4);
+                                push(@detector_cvparam_list, $cvp);
+
+                            } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+                                my $ref = get_referenceableParamGroupRef($el4);
+                                push(@detector_reference_list, $ref);
+
+                            } elsif ($el4->name eq 'userParam' ) {
+
+                                my $user = get_userParam($el4);
+                                push(@detector_user_list, $user);
+                                
+                            }
+                        }
+
+                    }
+
+                }#end el3
+
+                $source->cvParam(\@source_cvparam_list);
+                $source->userParam(\@source_user_list);
+                $source->referenceableParamGroupRef(\@source_reference_list);
+
+                $analyzer->cvParam(\@analyzer_cvparam_list);
+                $analyzer->userParam(\@analyzer_user_list);
+                $analyzer->referenceableParamGroupRef(\@analyzer_reference_list);
+
+                $detector->cvParam(\@detector_cvparam_list);
+                $detector->userParam(\@detector_user_list);
+                $detector->referenceableParamGroupRef(\@detector_reference_list);
+
+                $clist->source($source);
+                $clist->analyzer($analyzer);
+                $clist->detector($detector);
+
+                push(@clist, $clist);
+
+                $ic->componentList($clist);
+
+            } elsif ( $el2->name eq 'softwareRef' ) {
+                
+                my $software = MzML::SoftwareRef->new();
+                $software->ref($el2->{'att'}->{'ref'});
+                
+                $ic->softwareRef($software);
+
             }
 
-        }
+        }# end el2
 
-    }
+        push(@list, $ic);
+
+    }# end el
 
     my $icl = MzML::InstrumentConfigurationList->new();
     $icl->count($node->{'att'}->{'count'});
