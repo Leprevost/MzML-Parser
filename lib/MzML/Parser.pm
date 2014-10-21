@@ -18,6 +18,9 @@ use MzML::SampleList;
 use MzML::Sample;
 use MzML::InstrumentConfigurationList;
 use MzML::InstrumentConfiguration;
+use MzML::SoftwareList;
+use MzML::Software;
+use MzML::SoftwareParam;
 use XML::Twig;
 use URI;
 
@@ -41,6 +44,7 @@ sub parse {
             referenceableParamGroupList =>  \&parse_refparamgroup,
             sampleList                  =>  \&parse_samplelist,
             instrumentConfigurationList =>  \&parse_intrconflist,
+            softwareList                =>  \&parse_softwarelist,
         },
         pretty_print => 'indented',
     );
@@ -451,6 +455,47 @@ sub parse_intrconflist {
     $reg->instrumentConfigurationList($icl);
 }
 
+sub parse_softwarelist {
+    my ($parser, $node) = @_;
+
+    my @subnodes_1 = $node->children;
+    my @list;
+
+    my $sw;
+    my $sp;
+
+    for my $el1 ( @subnodes_1 ) {
+
+        if ( $el1->name eq 'software' ) {
+            
+            $sw = MzML::Software->new();
+            
+            $sw->id($el1->{'att'}->{'id'}) if defined ($el1->{'att'}->{'id'});
+            $sw->version($el1->{'att'}->{'version'}) if defined ($el1->{'att'}->{'version'});
+
+            my $el2 = $el1->first_child;
+
+            $sp = MzML::SoftwareParam->new();
+
+            $sp->accession($el2->{'att'}->{'accession'}) if defined ($el2->{'att'}->{'accession'});
+            $sp->cvRef($el2->{'att'}->{'cvRef'}) if defined ($el2->{'att'}->{'cvRef'});
+            $sp->name($el2->{'att'}->{'name'}) if defined ($el2->{'att'}->{'name'});
+            $sp->version($el2->{'att'}->{'version'}) if defined ($el2->{'att'}->{'version'});
+
+        }
+
+        $sw->softwareParam($sp);
+        push(@list, $sw);
+        
+    }
+
+    my $swl = MzML::SoftwareList->new();
+    $swl->count($node->{'att'}->{'count'});
+    $swl->software(\@list);
+
+    $reg->softwareList($swl);
+
+}
 
 sub get_cvParam {
     my $el = shift;

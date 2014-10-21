@@ -29,4 +29,3 @@ use DDP;
 my $p = MzML::Parser->new();
 
 my $res = $p->parse("t/miape_sample.mzML");
-p $res->instrumentConfigurationList->instrumentConfiguration->[0]->componentList->source->cvParam->[1];

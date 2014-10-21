@@ -9,6 +9,7 @@ use MzML::FileDescription;
 use MzML::ReferenceableParamGroupList;
 use MzML::SampleList;
 use MzML::InstrumentConfigurationList;
+use MzML::SoftwareList;
 
 has 'mzML' => (
     is  =>  'rw',
@@ -53,6 +54,15 @@ has 'instrumentConfigurationList' => (
     default => sub {
         my $self = shift;
         return my $obj = MzML::InstrumentConfigurationList->new();
+        }
+    );
+
+has 'softwareList' => (
+    is  =>  'rw',
+    isa =>  'MzML::SoftwareList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::SoftwareList->new();
         }
     );
 
