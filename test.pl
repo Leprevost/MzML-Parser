@@ -29,5 +29,3 @@ use DDP;
 my $p = MzML::Parser->new();
 
 my $res = $p->parse("t/miape_sample.mzML");
-
-p $res->dataProcessingList->dataProcessing->[1]->processingMethod->[0];#->cvParam->[0];

@@ -535,10 +535,6 @@ sub parse_dataproclist {
 
                 for my $el3 ( @subnodes_3 ) {
 
-                    undef(@cvparam_list);
-                    undef(@reference_list);
-                    undef(@user_list);
-
                     if ( $el3->name eq 'cvParam' ) {
 
                         my $cvp = get_cvParam($el3);
