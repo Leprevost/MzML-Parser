@@ -11,6 +11,7 @@ use MzML::SampleList;
 use MzML::InstrumentConfigurationList;
 use MzML::SoftwareList;
 use MzML::DataProcessingList;
+use MzML::Run;
 
 has 'mzML' => (
     is  =>  'rw',
@@ -73,6 +74,15 @@ has 'dataProcessingList' => (
     default => sub {
         my $self = shift;
         return my $obj = MzML::DataProcessingList->new();
+        }
+    );
+
+has 'run' => (
+    is  =>  'rw',
+    isa =>  'MzML::Run',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::Run->new();
         }
     );
 

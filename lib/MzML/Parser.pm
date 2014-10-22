@@ -24,6 +24,7 @@ use MzML::SoftwareParam;
 use MzML::DataProcessingList;
 use MzML::DataProcessing;
 use MzML::ProcessingMethod;
+use MzML::Run;
 use XML::Twig;
 use URI;
 
@@ -49,6 +50,7 @@ sub parse {
             instrumentConfigurationList     =>  \&parse_intrconflist,
             softwareList                    =>  \&parse_softwarelist,
             dataProcessingList              =>  \&parse_dataproclist,
+            run                             =>  \&parse_run,
         },
         pretty_print => 'indented',
     );
@@ -575,6 +577,62 @@ sub parse_dataproclist {
 
     $reg->dataProcessingList($dpl);
 
+}
+
+sub parse_run {
+    my ($parser, $node) = @_;
+
+    use DDP;
+
+    my $run = MzML::Run->new();
+    $run->defaultInstrumentConfigurationRef($node->{'att'}->{'defaultInstrumentConfigurationRef'});
+    $run->id($node->{'att'}->{'id'});
+    $run->sampleRef($node->{'att'}->{'sampleRef'}) if defined $node->{'att'}->{'sampleRef'};
+    $run->startTimeStamp($node->{'att'}->{'startTimeStamp'}) if defined $node->{'att'}->{'startTimeStamp'};
+
+    my @subnodes_1 = $node->children;
+    
+    my @cvparam_list;
+    my @reference_list;
+    my @user_list;                                            
+
+    for my $el1 ( @subnodes_1 ) {
+
+        if ( $el1->name eq 'cvParam' ) {
+
+            my $cvp = get_cvParam($el1);
+            push(@cvparam_list, $cvp);
+
+        } elsif ( $el1->name eq 'referenceableParamGroupRef' ) {
+
+            my $ref = get_referenceableParamGroupRef($el1);
+            push(@reference_list, $ref);
+
+        } elsif ( $el1->name eq 'userParam' ) {
+
+            my $user = get_userParam($el1);
+            push(@user_list, $user);
+
+        } elsif ( $el1->name eq 'sourceFileRefList' ) {
+            
+            #TODO not implemented
+
+        } elsif ( $el1->name eq 'spectrumList' ) {
+
+
+        } elsif ( $el1->name eq 'chromatogramList' ) {
+
+            
+        }
+
+    }#end el1
+
+    #$proc->cvParam(\@cvparam_list);
+    #$proc->userParam(\@user_list);
+    #$proc->referenceableParamGroupRef(\@reference_list);
+                                                
+
+    $reg->run($run);
 }
 
 sub get_cvParam {
