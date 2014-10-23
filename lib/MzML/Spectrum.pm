@@ -5,8 +5,11 @@ use warnings;
 use v5.12;
 use Moose;
 use namespace::autoclean;
-use MzML::SpectrumDescription;
+use MzML::ScanList;
+use MzML::PrecursorList;
+use MzML::ProductList;
 use MzML::BinaryDataArrayList;
+
 
 has 'dataProcessingRef' => (
     is  =>  'rw',
@@ -28,11 +31,6 @@ has 'index' => (
     isa =>  'Int',
     );
 
-has 'nativeID' => (
-    is  =>  'rw',
-    isa =>  'Str',
-    );
-
 has 'sourceFileRef' => (
     is  =>  'rw',
     isa =>  'Str',
@@ -43,14 +41,33 @@ has 'spotID' => (
     isa =>  'Str',
     );
 
-has 'spectrumDescription' => (
+has 'scanList' => (
     is  =>  'rw',
-    isa =>  'MzML::SpectrumDescription',
+    isa =>  'MzML::ScanList',
     default => sub {
         my $self = shift;
-        return my $obj = MzML::SpectrumDescription->new();
+        return my $obj = MzML::ScanList->new();
         }
     );
+
+has 'precursorList' => (
+    is  =>  'rw',
+    isa =>  'MzML::PrecursorList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::PrecursorList->new();
+        }
+    );
+
+has 'productList' => (
+    is  =>  'rw',
+    isa =>  'MzML::ProductList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::ProductList->new();
+        }
+    );
+
 
 has 'binaryDataArrayList' => (
     is  =>  'rw',

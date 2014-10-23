@@ -29,4 +29,4 @@ use DDP;
 my $p = MzML::Parser->new();
 
 my $res = $p->parse("t/miape_sample.mzML");
-p $res->fileDescription->fileContent->cvParam;
+p $res->run->spectrumList->spectrum->[0];

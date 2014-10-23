@@ -9,11 +9,6 @@ use MzML::IsolationWindow;
 use MzML::SelectedIonList;
 use MzML::Activation;
 
-has 'externalNativeID' => (
-    is  =>  'rw',
-    isa =>  'Str',
-    );
-
 has 'externalSpectrumID' => (
     is  =>  'rw',
     isa =>  'Str',
@@ -38,7 +33,7 @@ has 'isolationWindow' => (
         }
     );
 
-has 'selectedIon' => (
+has 'selectedIonList' => (
     is  =>  'rw',
     isa =>  'MzML::SelectedIonList',
     default => sub {

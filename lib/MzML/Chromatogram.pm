@@ -34,6 +34,24 @@ has 'nativeID' => (
     isa =>  'Str',
     );
 
+has 'precursor' => (
+    is  =>  'rw',
+    isa =>  'MzML::Precursor',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::Precursor->new();
+        }
+    );
+
+has 'product' => (
+    is  =>  'rw',
+    isa =>  'MzML::Product',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::Product->new();
+        }
+    );
+
 has 'binaryDataArrayList' => (
     is  =>  'rw',
     isa =>  'MzML::BinaryDataArrayList',

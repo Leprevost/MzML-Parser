@@ -31,15 +31,6 @@ has 'startTimeStamp' => (
     isa =>  'Str',
     );
 
-has 'sourceFileRefList' => (
-    is   => 'rw',
-    isa =>  'MzML::SourceFileRefList',
-    default => sub {
-        my $self = shift;
-        return my $obj = MzML::SourceFileRefList->new();
-        }
-    );
-
 has 'spectrumList' => (
     is  => 'rw',
     isa =>  'MzML::SpectrumList',

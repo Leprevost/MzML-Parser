@@ -639,8 +639,6 @@ sub parse_run {
             $sl->count($el1->{'att'}->{'count'});
             $sl->defaultDataProcessingRef($el1->{'att'}->{'defaultDataProcessingRef'});
 
-            my $spec = MzML::Spectrum->new();
-
             my @subnodes_2 = $el1->children;
             my @spectrum;
 
@@ -648,6 +646,8 @@ sub parse_run {
                 #inside spectrumlist tag
 
                 if ( $el2->name eq 'spectrum' ) {
+
+                    my $spec = MzML::Spectrum->new();
 
                     $spec->dataProcessingRef($el2->{'att'}->{'dataProcessingRef'}) if defined $el2->{'att'}->{'dataProcessingRef'};
                     $spec->defaultArrayLength($el2->{'att'}->{'defaultArrayLength'});
