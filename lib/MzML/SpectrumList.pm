@@ -11,6 +11,11 @@ has 'count' => (
     isa =>  'Int',
     );
 
+has 'defaultDataProcessingRef' => (
+    is  =>  'rw',
+    isa =>  'Str',
+    );
+
 has 'spectrum' => (
     is  =>  'rw',
     isa =>  'ArrayRef[MzML::Spectrum]',

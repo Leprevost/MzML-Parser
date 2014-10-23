@@ -10,7 +10,7 @@ use MzML::BinaryDataArrayList;
 with 'MzML::CommonParams';
 
 has 'dataProcessingRef' => (
-    is  =>  'rw ',
+    is  =>  'rw',
     isa =>  'Str',
     );
 

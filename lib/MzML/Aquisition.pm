@@ -5,6 +5,7 @@ use warnings;
 use v5.12;
 use Moose;
 use namespace::autoclean;
+use MzML::scanWindowList;
 
 with 'MzML::CommonParams';
 
@@ -14,6 +15,11 @@ has 'externalNativeID' => (
     );
 
 has 'externalSpectrumID' => (
+    is  =>  'rw',
+    isa =>  'Str',
+    );
+
+has 'instrumentConfigurationRef' => (
     is  =>  'rw',
     isa =>  'Str',
     );
@@ -31,6 +37,15 @@ has 'sourceFileRef' => (
 has 'spectrumRef' => (
     is  =>  'rw',
     isa =>  'Str',
+    );
+
+has 'scanWindowList' => (
+    is  =>  'rw',
+    isa =>  'MzML::scanWindowList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::scanWindowList->new();
+        }
     );
 
 1;

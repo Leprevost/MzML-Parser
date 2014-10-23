@@ -25,6 +25,11 @@ use MzML::DataProcessingList;
 use MzML::DataProcessing;
 use MzML::ProcessingMethod;
 use MzML::Run;
+use MzML::SourceFileRefList;
+use MzML::SpectrumList;
+use MzML::Spectrum;
+use MzML::ChromatogramList;
+use MzML::Chromatogram;
 use XML::Twig;
 use URI;
 
@@ -478,22 +483,43 @@ sub parse_softwarelist {
             
             $sw->id($el1->{'att'}->{'id'}) if defined ($el1->{'att'}->{'id'});
             $sw->version($el1->{'att'}->{'version'}) if defined ($el1->{'att'}->{'version'});
+            
+            my @subnodes_2 = $el1->children;
+            
+            my @cvparam;
+            my @reference;
+            my @userlist;
 
-            my $el2 = $el1->first_child;
+            for my $el2 ( @subnodes_2 ) {
 
-            $sp = MzML::SoftwareParam->new();
+                if ( $el2->name eq 'cvParam' ) {
+        
+                    my $cvp = get_cvParam($el2);
+                    push(@cvparam, $cvp);
 
-            $sp->accession($el2->{'att'}->{'accession'}) if defined ($el2->{'att'}->{'accession'});
-            $sp->cvRef($el2->{'att'}->{'cvRef'}) if defined ($el2->{'att'}->{'cvRef'});
-            $sp->name($el2->{'att'}->{'name'}) if defined ($el2->{'att'}->{'name'});
-            $sp->version($el2->{'att'}->{'version'}) if defined ($el2->{'att'}->{'version'});
+                } elsif ( $el2->name eq 'referenceableParamGroupRef' ) {
+
+                    my $ref = get_referenceableParamGroupRef($el2);
+                    push(@reference, $ref);
+
+                } elsif ( $el2->name eq 'userParam' ) {
+
+                    my $user = get_userParam($el2);
+                    push(@userlist, $user);
+
+                }
+
+            }#end el2
+
+            $sw->cvParam(\@cvparam);
+            $sw->referenceableParamGroupRef(\@reference);
+            $sw->userParam(\@userlist);
 
         }
 
-        $sw->softwareParam($sp);
         push(@list, $sw);
         
-    }
+    }#end el1
 
     my $swl = MzML::SoftwareList->new();
     $swl->count($node->{'att'}->{'count'});
@@ -527,7 +553,6 @@ sub parse_dataproclist {
                 
                 $proc = MzML::ProcessingMethod->new();
                 $proc->order($el2->{'att'}->{'order'});
-                $proc->softwareRef($el2->{'att'}->{'softwareRef'}) if defined ($el2->{'att'}->{'softwareRef'});
 
                 my @subnodes_3 = $el2->children;
 
@@ -596,41 +621,79 @@ sub parse_run {
     my @reference_list;
     my @user_list;                                            
 
+    my $sfrl;
+    my $sl;
+    my $cl;
+
     for my $el1 ( @subnodes_1 ) {
-
-        if ( $el1->name eq 'cvParam' ) {
-
-            my $cvp = get_cvParam($el1);
-            push(@cvparam_list, $cvp);
-
-        } elsif ( $el1->name eq 'referenceableParamGroupRef' ) {
-
-            my $ref = get_referenceableParamGroupRef($el1);
-            push(@reference_list, $ref);
-
-        } elsif ( $el1->name eq 'userParam' ) {
-
-            my $user = get_userParam($el1);
-            push(@user_list, $user);
-
-        } elsif ( $el1->name eq 'sourceFileRefList' ) {
+        
+        if ( $el1->name eq 'sourceFileRefList' ) {
             
+            #$sfrl = MzML::SourceFileRefList->new();
             #TODO not implemented
 
         } elsif ( $el1->name eq 'spectrumList' ) {
 
+            $sl = MzML::SpectrumList->new();
+
+            $sl->count($el1->{'att'}->{'count'});
+            $sl->defaultDataProcessingRef($el1->{'att'}->{'defaultDataProcessingRef'});
+
+            my $spec = MzML::Spectrum->new();
+
+            my @subnodes_2 = $el1->children;
+            my @spectrum;
+
+            for my $el2 ( @subnodes_2 ) {
+                #inside spectrumlist tag
+
+                if ( $el2->name eq 'spectrum' ) {
+
+                    $spec->dataProcessingRef($el2->{'att'}->{'dataProcessingRef'}) if defined $el2->{'att'}->{'dataProcessingRef'};
+                    $spec->defaultArrayLength($el2->{'att'}->{'defaultArrayLength'});
+                    $spec->id($el2->{'att'}->{'defaultArrayLength'});
+                    $spec->index($el2->{'att'}->{'index'});
+                    $spec->nativeID($el2->{'att'}->{'nativeID'}) if defined $el2->{'att'}->{'nativeID'};;
+                    $spec->sourceFileRef($el2->{'att'}->{'sourceFileRef'}) if defined $el2->{'att'}->{'sourceFileRef'};
+                    $spec->spotID($el2->{'att'}->{'spotID'}) if defined $el2->{'att'}->{'spotID'};
+
+                    push(@spectrum, $spec);
+
+                }
+
+                $sl->spectrum(\@spectrum);
+
+                my @subnodes_3 = $el2->children;
+                
+                my @cvparam;
+
+                for my $el3 ( @subnodes_3 ) {
+                    #inside spectrum tag
+                    
+                    if ( $el3->name eq 'binaryDataArrayList' ) {
+
+                        #my $user = get_userParam($el3);
+                        #push(@user_list, $user);
+
+                    }
+
+                }#end el3
+
+            }#end el2
+
 
         } elsif ( $el1->name eq 'chromatogramList' ) {
-
+            
+            $cl = MzML::ChromatogramList->new();
             
         }
 
     }#end el1
+    
 
-    #$proc->cvParam(\@cvparam_list);
-    #$proc->userParam(\@user_list);
-    #$proc->referenceableParamGroupRef(\@reference_list);
-                                                
+    #$run->sourceFileRefList($sfrl);
+    $run->spectrumList($sl);
+    $run->chromatogramList($cl);
 
     $reg->run($run);
 }

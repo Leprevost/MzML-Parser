@@ -13,9 +13,4 @@ has 'order' => (
     isa =>  'Int',
     );
 
-has 'softwareRef' => (
-    is  =>  'rw',
-    isa =>  'Str',
-    );
-
 1;

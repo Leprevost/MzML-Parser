@@ -7,6 +7,8 @@ use Moose;
 use namespace::autoclean;
 use MzML::SoftwareParam;
 
+with 'MzML::CommonParams';
+
 has 'id' => (
     is  =>  'rw',
     isa =>  'Str',
@@ -15,15 +17,6 @@ has 'id' => (
 has 'version' => (
     is  =>  'rw',
     isa =>  'Str',
-    );
-
-has 'softwareParam' => (
-    is  =>  'rw',
-    isa =>  'MzML::SoftwareParam',
-    default => sub {
-        my $self = shift;
-        return my $obj = MzML::SoftwareParam->new();
-        }
     );
 
 1;

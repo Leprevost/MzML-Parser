@@ -1,4 +1,4 @@
-package MzML::PrecursosList;
+package MzML::PrecursorList;
 
 use strict;
 use warnings;

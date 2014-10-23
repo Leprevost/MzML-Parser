@@ -7,7 +7,6 @@ use Moose;
 use namespace::autoclean;
 use MzML::AquisitionList;
 use MzML::PrecursorList;
-use MzML::Scan;
 
 with 'MzML::CommonParams';
 
@@ -29,11 +28,4 @@ has 'precursorList' => (
         }
     );
 
-has 'scan' => (
-    is  =>  'rw',
-    isa =>  'MzML::Scan',
-    default => sub {
-        my $self = shift;
-        return my $obj = MzML::Scan->new();
-        }
-    );
+1;

@@ -8,8 +8,6 @@ use namespace::autoclean;
 use MzML::SpectrumDescription;
 use MzML::BinaryDataArrayList;
 
-with 'MzML::CommonParams';
-
 has 'dataProcessingRef' => (
     is  =>  'rw',
     isa =>  'Str',

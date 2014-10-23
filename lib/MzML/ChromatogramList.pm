@@ -11,6 +11,11 @@ has 'count' => (
     isa =>  'Int',
     );
 
+has 'defaultDataProcessingRef' => (
+    is  =>  'rw',
+    isa =>  'Str',
+    );
+
 has 'chromatogram' => (
     is  =>  'rw',
     isa =>  'ArrayRef[MzML::Chromatogram]',

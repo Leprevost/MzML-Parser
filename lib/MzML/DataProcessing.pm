@@ -12,15 +12,6 @@ has 'id' => (
     isa =>  'Str',
     );
 
-has 'softwareRef' => (
-    is  =>  'rw',
-    isa =>  'MzML::SoftwareRef',
-    default => sub {
-        my $self = shift;
-        return my $obj = MzML::SoftwareRef->new();
-        }
-    );
-
 has 'processingMethod' => (
     is  =>  'rw',
     isa =>  'ArrayRef[MzML::ProcessingMethod]',
