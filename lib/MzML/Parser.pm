@@ -30,6 +30,9 @@ use MzML::SpectrumList;
 use MzML::Spectrum;
 use MzML::ChromatogramList;
 use MzML::Chromatogram;
+use MzML::Scan;
+use MzML::ScanWindowList;
+use MzML::ScanWindow;
 use XML::Twig;
 use URI;
 
@@ -657,27 +660,116 @@ sub parse_run {
                     $spec->sourceFileRef($el2->{'att'}->{'sourceFileRef'}) if defined $el2->{'att'}->{'sourceFileRef'};
                     $spec->spotID($el2->{'att'}->{'spotID'}) if defined $el2->{'att'}->{'spotID'};
 
+                    my @subnodes_3 = $el2->children;               
+                    my @cvparam;
+
+                    for my $el3 ( @subnodes_3 ) {
+                    #inside spectrum tag
+                        
+                        if ( $el3->name eq 'scanList' ) {
+
+                            my @subnodes_4 = $el3->children;
+
+                            my @cvparam;
+                            my @reference;
+                            my @user;
+
+                            my $scanlist;
+                            my @scans;
+
+                            for my $el4 ( @subnodes_4 ) {
+                                #inside scanlist tag
+
+                                $scanlist = MzML::ScanList->new();
+
+                                if ( $el4->name eq 'cvParam' ) {
+
+                                    my $cvp = get_cvParam($el4);
+                                    push(@cvparam, $cvp);
+
+                                } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+                                    my $ref = get_referenceableParamGroupRef($el4);
+                                    push(@reference, $ref);
+
+                                } elsif ( $el4->name eq 'userParam' ) {
+
+                                    my $user = get_userParam($el4);
+                                    push(@user, $user);
+
+                                } elsif ( $el4->name eq 'scan' ) {
+                                    
+                                    my $scan = MzML::Scan->new();
+                                    my @subnodes_5 = $el4->children;
+
+                                    my @cvparam;
+                                    my @reference;
+                                    my @user;
+
+                                    my $swl;
+                                    my @scanwindows;
+
+                                    for my $el5 ( @subnodes_5 ) {
+                                        #inside scan tag
+                                      
+                                        if ( $el5->name eq 'cvParam' ) {
+
+                                            my $cvp = get_cvParam($el5);
+                                            push(@cvparam, $cvp);
+
+                                        } elsif ( $el5->name eq 'referenceableParamGroupRef' ) {
+    
+                                            my $ref = get_referenceableParamGroupRef($el5);
+                                            push(@reference, $ref);
+
+                                        } elsif ( $el5->name eq 'userParam' ) {
+
+                                            my $user = get_userParam($el5);
+                                            push(@user, $user);
+
+                                        } elsif ( $el5->name eq 'scanWindowList' ) {
+
+                                            $swl = MzML::ScanWindowList->new();
+                                            $swl->count($el5->{'att'}->{'count'});
+
+                                        }
+                                        
+                                        
+                                   }#end el5
+                                   
+                                   $scan->cvParam(\@cvparam);
+                                   $scan->referenceableParamGroupRef(\@reference);
+                                   $scan->userParam(\@user);
+                                   $scan->scanWindowList($swl);                                   
+
+                                   push(@scans, $scan);
+
+                                }
+                            
+                            }#end el4
+
+                            $scanlist->cvParam(\@cvparam);
+                            $scanlist->referenceableParamGroupRef(\@reference);
+                            $scanlist->userParam(\@user);
+                            $scanlist->scan(\@scans);
+
+                            $spec->scanList($scanlist);
+
+                        } elsif ( $el3->name eq 'precursorList' ) {
+
+                        } elsif ( $el3->name eq 'productList' ) {
+
+                        } elsif ( $el3->name eq 'binaryDataArrayList' ) {
+
+                        }
+
+                    }#end el3
+
                     push(@spectrum, $spec);
 
                 }
 
                 $sl->spectrum(\@spectrum);
-
-                my @subnodes_3 = $el2->children;
-                
-                my @cvparam;
-
-                for my $el3 ( @subnodes_3 ) {
-                    #inside spectrum tag
-                    
-                    if ( $el3->name eq 'binaryDataArrayList' ) {
-
-                        #my $user = get_userParam($el3);
-                        #push(@user_list, $user);
-
-                    }
-
-                }#end el3
 
             }#end el2
 
@@ -737,25 +829,5 @@ sub get_userParam {
 
     return $user;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 1;
