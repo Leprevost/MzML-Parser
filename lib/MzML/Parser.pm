@@ -33,6 +33,12 @@ use MzML::Chromatogram;
 use MzML::Scan;
 use MzML::ScanWindowList;
 use MzML::ScanWindow;
+use MzML::PrecursorList;
+use MzML::Precursor;
+use MzML::Activation;
+use MzML::IsolationWindow;
+use MzML::SelectedIonList;
+use MzML::SelectedIon;
 use XML::Twig;
 use URI;
 
@@ -663,10 +669,29 @@ sub parse_run {
                     my @subnodes_3 = $el2->children;               
                     my @cvparam;
 
+                    my @cvparam_el3;
+                    my @reference_el3;
+                    my @user_el3;
+
                     for my $el3 ( @subnodes_3 ) {
                     #inside spectrum tag
-                        
-                        if ( $el3->name eq 'scanList' ) {
+
+                        if ( $el3->name eq 'cvParam' ) {
+
+                            my $cvp = get_cvParam($el3);
+                            push(@cvparam_el3, $cvp);
+
+                        } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+
+                            my $ref = get_referenceableParamGroupRef($el3);
+                            push(@reference_el3, $ref);
+
+                        } elsif ( $el3->name eq 'userParam' ) {
+
+                            my $user = get_userParam($el3);
+                            push(@user_el3, $user);
+
+                        } elsif ( $el3->name eq 'scanList' ) {
 
                             my @subnodes_4 = $el3->children;
 
@@ -757,6 +782,172 @@ sub parse_run {
 
                         } elsif ( $el3->name eq 'precursorList' ) {
 
+                            my $precursorlist = MzML::PrecursorList->new();
+                            $precursorlist->count($el3->{'att'}->{'count'});
+
+                            my @subnodes_4 = $el3->children;
+
+                            my $precursor;
+                            my @precursorlist;
+
+                            for my $el4 ( @subnodes_4 ) {
+                                #inside precursorlist tag
+
+                                if ( $el4->name eq 'precursor' ) {
+
+                                    my $precursor = MzML::Precursor->new();
+                                    $precursor->spectrumRef($el4->{'att'}->{'spectrumRef'});
+
+                                    my @subnodes_5 = $el4->children;
+
+                                    my $activation;
+                                    my $isolation;
+                                    my $selectedIonList;
+                                    my $selectedIon;
+                                    my @ionlist;
+                                
+                                    for my $el5 ( @subnodes_5 ) {
+                                        #inside precursor tag
+                                       
+                                        my (@activation_cvparam, @isolation_cvparam);
+                                        my (@activation_reference, @isolation_reference);
+                                        my (@activation_user, @isolation_user);
+                                        
+                                        if ( $el5->name eq 'activation' ) {
+
+                                            $activation = MzML::Activation->new();
+
+                                            my @subnodes_6 = $el5->children;
+
+                                            for my $el6 ( @subnodes_6 ) {
+                                                #inside activation tag
+                                               
+                                                if ( $el6->name eq 'cvParam' ) {
+    
+                                                    my $cvp = get_cvParam($el6);
+                                                    push(@activation_cvparam, $cvp);
+    
+                                                } elsif ( $el6->name eq 'referenceableParamGroupRef' ) {
+    
+                                                    my $ref = get_referenceableParamGroupRef($el6);
+                                                    push(@activation_reference, $ref);
+            
+                                                 } elsif ( $el6->name eq 'userParam' ) {
+        
+                                                    my $user = get_userParam($el6);
+                                                    push(@activation_user, $user);
+        
+                                                 }
+                                                
+                                            }#end el6
+
+                                            $activation->cvParam(\@activation_cvparam);
+                                            $activation->referenceableParamGroupRef(\@activation_reference);
+                                            $activation->userParam(\@activation_user);
+
+                                        } elsif ( $el5->name eq 'isolationWindow' ) {
+
+                                            $isolation = MzML::IsolationWindow->new();
+
+                                            my @subnodes_6 = $el5->children;
+
+                                            for my $el6 ( @subnodes_6 ) {
+                                                #inside activation tag
+                                               
+                                                if ( $el6->name eq 'cvParam' ) {
+    
+                                                    my $cvp = get_cvParam($el6);
+                                                    push(@activation_cvparam, $cvp);
+    
+                                                } elsif ( $el6->name eq 'referenceableParamGroupRef' ) {
+    
+                                                    my $ref = get_referenceableParamGroupRef($el6);
+                                                    push(@activation_reference, $ref);
+            
+                                                 } elsif ( $el6->name eq 'userParam' ) {
+        
+                                                    my $user = get_userParam($el6);
+                                                    push(@activation_user, $user);
+        
+                                                 }
+                                                
+                                            }#end el6
+
+                                            $isolation->cvParam(\@activation_cvparam);
+                                            $isolation->referenceableParamGroupRef(\@activation_reference);
+                                            $isolation->userParam(\@activation_user);
+
+                                        } elsif ( $el5->name eq 'selectedIonList' ) {
+
+                                            $selectedIonList = MzML::SelectedIonList->new();
+                                            $selectedIonList->count($el5->{'att'}->{'count'});
+                                            
+                                            my @subnodes_6 = $el5->children;
+                                            
+                                            for my $el6 ( @subnodes_6 ) {
+                                                #inside selectedionlist tag
+
+                                                if ( $el6->name eq 'selectedIon' ) {
+
+                                                    $selectedIon = MzML::SelectedIon->new();
+                                                    
+                                                    my @subnodes_7 = $el6->children;
+
+                                                    my @cvparam_el7;
+                                                    my @reference_el7;
+                                                    my @user_el7;
+
+                                                    for my $el7 ( @subnodes_7 ) {
+                                                        #inside selectedIon tag
+
+                                                        if ( $el7->name eq 'cvParam' ) {
+    
+                                                            my $cvp = get_cvParam($el7);
+                                                            push(@cvparam_el7, $cvp);
+    
+                                                        } elsif ( $el7->name eq 'referenceableParamGroupRef' ) {
+    
+                                                            my $ref = get_referenceableParamGroupRef($el7);
+                                                            push(@reference_el7, $ref);
+            
+                                                         } elsif ( $el7->name eq 'userParam' ) {
+        
+                                                            my $user = get_userParam($el7);
+                                                            push(@user_el7, $user);
+            
+                                                         }
+
+                                                    }#end el7
+
+                                                    $selectedIon->cvParam(\@cvparam_el7);
+                                                    
+                                                }
+
+                                                push(@ionlist, $selectedIon);
+
+                                            }#end el6
+
+                                            $selectedIonList->selectedIon(\@ionlist);
+
+                                        }
+
+                                    }#end el5
+
+
+                                    $precursor->activation($activation);
+                                    $precursor->isolationWindow($isolation);
+                                    $precursor->selectedIonList($selectedIonList);
+
+                                    push(@precursorlist, $precursor);
+                                }
+                                
+                            }#end el4
+
+                            $precursorlist->precursor(\@precursorlist);
+
+                            $spec->precursorList($precursorlist);
+                            
+
                         } elsif ( $el3->name eq 'productList' ) {
 
                         } elsif ( $el3->name eq 'binaryDataArrayList' ) {
@@ -764,6 +955,10 @@ sub parse_run {
                         }
 
                     }#end el3
+
+                    $spec->cvParam(\@cvparam_el3);
+                    $spec->referenceableParamGroupRef(\@reference_el3);
+                    $spec->userParam(\@user_el3);
 
                     push(@spectrum, $spec);
 
