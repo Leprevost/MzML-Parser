@@ -376,7 +376,6 @@ sub parse_intrconflist {
                             }
                         }
                         
-
                     } elsif ( $el3->name eq 'analyzer' ) {
 
                         $analyzer = MzML::Analyzer->new();
@@ -997,7 +996,10 @@ sub parse_run {
         		                            my $user = get_userParam($el5);
         		                            push(@user_el5, $user);
         
-        		                         }
+        		                         } elsif ( $el5->name eq 'binary' ) {
+                                             
+                                             $binaryDataArray->binary($el5->text);
+                                         }
 
                                     }#end el5
 
