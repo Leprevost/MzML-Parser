@@ -972,27 +972,40 @@ sub parse_run {
 
                                     $binaryDataArray = MzML::BinaryDataArray->new();
                                     $binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'});
-            # YOU ARE HERE
-                                    if ( $el4->name eq 'cvParam' ) {
 
-    		                            my $cvp = get_cvParam($el4);
-    		                            push(@cvparam_el4, $cvp);
+                                    my @subnodes_5 = $el4->children;
 
-    		                        } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+                                    my @cvparam_el5;
+                                    my @reference_el5;
+                                    my @user_el5;
 
-    		                            my $ref = get_referenceableParamGroupRef($el4);
-    		                            push(@reference_el4, $ref);
+                                    for my $el5 ( @subnodes_5 ) {
+                                        #inside binaryDataArray
+                                    
+                                        if ( $el5->name eq 'cvParam' ) {
 
-    		                         } elsif ( $el4->name eq 'userParam' ) {
+        		                            my $cvp = get_cvParam($el5);
+        		                            push(@cvparam_el5, $cvp);
 
-    		                            my $user = get_userParam($el4);
-    		                            push(@user_el4, $user);
+        		                        } elsif ( $el5->name eq 'referenceableParamGroupRef' ) {
 
-    		                         }
+        		                            my $ref = get_referenceableParamGroupRef($el5);
+        		                            push(@reference_el5, $ref);
+
+        		                         } elsif ( $el5->name eq 'userParam' ) {
+
+        		                            my $user = get_userParam($el5);
+        		                            push(@user_el5, $user);
+        
+        		                         }
+
+                                    }#end el5
+
+                                    $binaryDataArray->cvParam(\@cvparam_el5);
 
                                     push(@binarylist, $binaryDataArray);
                                 }
-
+    
                             }#end el4
 
                             $binaryDataArrayList->binaryDataArray(\@binarylist);
