@@ -30,6 +30,7 @@ my $p = MzML::Parser->new();
 
 my $res = $p->parse("t/miape_sample.mzML");
 #p $res->run->spectrumList->spectrum->[47]->precursorList->precursor;
-p $res->run->spectrumList->spectrum->[47]->precursorList->precursor->[0]->selectedIonList->selectedIon->[0]->cvParam;
+#p $res->run->spectrumList->spectrum->[47]->precursorList->precursor->[0]->selectedIonList->selectedIon->[0]->cvParam;
+p $res->run->spectrumList->spectrum->[47]->binaryDataArrayList->binaryDataArray->[0];
 
 

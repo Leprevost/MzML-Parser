@@ -39,6 +39,8 @@ use MzML::Activation;
 use MzML::IsolationWindow;
 use MzML::SelectedIonList;
 use MzML::SelectedIon;
+use MzML::BinaryDataArrayList;
+use MzML::BinaryDataArray;
 use XML::Twig;
 use URI;
 
@@ -673,6 +675,10 @@ sub parse_run {
                     my @reference_el3;
                     my @user_el3;
 
+                    my $binaryDataArrayList;
+                    my $binaryDataArray;
+                    my @binarylist;
+
                     for my $el3 ( @subnodes_3 ) {
                     #inside spectrum tag
 
@@ -805,7 +811,7 @@ sub parse_run {
                                     my $selectedIonList;
                                     my $selectedIon;
                                     my @ionlist;
-                                
+
                                     for my $el5 ( @subnodes_5 ) {
                                         #inside precursor tag
                                        
@@ -950,9 +956,50 @@ sub parse_run {
 
                         } elsif ( $el3->name eq 'productList' ) {
 
+                            #TODO : no example provided to create this parsing
+
                         } elsif ( $el3->name eq 'binaryDataArrayList' ) {
 
+                            $binaryDataArrayList = MzML::BinaryDataArrayList->new();
+                            $binaryDataArrayList->count($el3->{'att'}->{'count'});
+
+                            my @subnodes_4 = $el3->children;
+
+                            for my $el4 ( @subnodes_4 ) {
+                                #inside binarydataarraylist
+                                
+                                if ( $el4->name eq 'binaryDataArray' ) {
+
+                                    $binaryDataArray = MzML::BinaryDataArray->new();
+                                    $binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'});
+            # YOU ARE HERE
+                                    if ( $el4->name eq 'cvParam' ) {
+
+    		                            my $cvp = get_cvParam($el4);
+    		                            push(@cvparam_el4, $cvp);
+
+    		                        } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+    		                            my $ref = get_referenceableParamGroupRef($el4);
+    		                            push(@reference_el4, $ref);
+
+    		                         } elsif ( $el4->name eq 'userParam' ) {
+
+    		                            my $user = get_userParam($el4);
+    		                            push(@user_el4, $user);
+
+    		                         }
+
+                                    push(@binarylist, $binaryDataArray);
+                                }
+
+                            }#end el4
+
+                            $binaryDataArrayList->binaryDataArray(\@binarylist);
+                            $spec->binaryDataArrayList($binaryDataArrayList);
+
                         }
+
 
                     }#end el3
 
