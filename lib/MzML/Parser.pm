@@ -1032,9 +1032,69 @@ sub parse_run {
 
 
         } elsif ( $el1->name eq 'chromatogramList' ) {
+
+			use DDP;
             
             $cl = MzML::ChromatogramList->new();
+			$cl->count($el1->{'att'}->{'count'});
+			$cl->defaultDataProcessingRef($el1->{'att'}->{'defaultDataProcessingRef'});
             
+			my @subnodes_2 = $el1->children;
+
+			my @chromatogramlist;
+			my $chromatogram;
+
+			for my $el2 ( @subnodes_2 ) {
+			#inside chromatogramlist tag
+			
+				if ( $el2->name eq 'chromatogram' ) {
+				
+					$chromatogram = MzML::Chromatogram->new();
+
+					$chromatogram->defaultArrayLength($el2->{'att'}->{'defaultArrayLength'}) if defined ($el2->{'att'}->{'defaultArrayLength'});
+					$chromatogram->id($el2->{'att'}->{'id'}) if defined ($el2->{'att'}->{'id'});
+					$chromatogram->index($el2->{'att'}->{'index'}) if defined ($el2->{'att'}->{'index'});
+
+					my @subnodes_3 = $el2->children;
+
+					my @cvparam_el3;
+					my @reference_el3;
+					my @user_el3;
+					
+					for my $el3 ( @subnodes_3 ) {
+
+						if ( $el3->name eq 'cvParam' ) {
+
+							my $cvp = get_cvParam($el3);
+	                        push(@cvparam_el3, $cvp);
+
+	                    } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+
+	                    	my $ref = get_referenceableParamGroupRef($el3);
+	                        push(@reference_el3, $ref);
+
+	                    } elsif ( $el3->name eq 'userParam' ) {
+		
+	        	            my $user = get_userParam($el3);
+	                        push(@user_el3, $user);
+
+	                    }
+
+					}
+
+					$chromatogram->cvParam(\@cvparam_el3);
+					$chromatogram->referenceableParamGroupRef(\@reference_el3);
+					$chromatogram->userParam(\@user_el3);
+
+
+					push(@chromatogramlist, $chromatogram);
+
+				}
+
+			}#end el2
+
+			$cl->chromatogram(\@chromatogramlist);
+
         }
 
     }#end el1

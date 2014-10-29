@@ -6,6 +6,7 @@ use v5.12;
 use Moose;
 use namespace::autoclean;
 use MzML::BinaryDataArrayList;
+use MzML::Product;
 
 with 'MzML::CommonParams';
 
