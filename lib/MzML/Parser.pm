@@ -1061,7 +1061,12 @@ sub parse_run {
 					my @reference_el3;
 					my @user_el3;
 					
+					my $binaryDataArrayList;
+					my $binaryDataArray;
+					my @binarydata;
+					
 					for my $el3 ( @subnodes_3 ) {
+						#inside chromatogram tag
 
 						if ( $el3->name eq 'cvParam' ) {
 
@@ -1078,14 +1083,60 @@ sub parse_run {
 	        	            my $user = get_userParam($el3);
 	                        push(@user_el3, $user);
 
-	                    }
+	                    } elsif ( $el3->name eq 'binaryDataArrayList' ) {
 
-					}
+							$binaryDataArrayList = MzML::BinaryDataArrayList->new();
+							$binaryDataArrayList->count($el3->{'att'}->{'count'});
+
+							my @subnodes_4 = $el3->children;
+
+							for my $el4 ( @subnodes_4 ) {
+								#inside binarydataarraylist tag
+
+								if ( $el4->name eq 'binaryDataArray' ) {
+
+									$binaryDataArray = MzML::BinaryDataArray->new();
+									$binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'});
+									push(@binarydata, $binaryDataArray);
+
+									my @subnodes_5 = $el4->children;
+
+									for my $el5 ( @subnodes_5 ) {
+
+										if ( $el3->name eq 'cvParam' ) {
+
+											$cvp = get_cvParam($el3);
+										push(@cvparam_el3, $cvp);
+
+									    } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+
+									    	my $ref = get_referenceableParamGroupRef($el3);
+										push(@reference_el3, $ref);
+
+									    } elsif ( $el3->name eq 'userParam' ) {
+		
+										    my $user = get_userParam($el3);
+										push(@user_el3, $user);
+
+									    }
+
+									}
+
+								}
+
+
+							}#el4 end
+
+							$binaryDataArrayList->binaryDataArray(\@binarydata);
+
+						}
+
+					}#end el3
 
 					$chromatogram->cvParam(\@cvparam_el3);
 					$chromatogram->referenceableParamGroupRef(\@reference_el3);
 					$chromatogram->userParam(\@user_el3);
-
+					$chromatogram->binaryDataArrayList($binaryDataArrayList);
 
 					push(@chromatogramlist, $chromatogram);
 

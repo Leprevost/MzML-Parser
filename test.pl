@@ -29,4 +29,4 @@ use DDP;
 my $p = MzML::Parser->new();
 
 my $res = $p->parse("t/miape_sample.mzML");
-p $res->run->chromatogramList->chromatogram->[0];
+p $res->run->chromatogramList->chromatogram->[0]->binaryDataArrayList->binaryDataArray;
