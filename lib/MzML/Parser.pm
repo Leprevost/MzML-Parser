@@ -1096,31 +1096,42 @@ sub parse_run {
 								if ( $el4->name eq 'binaryDataArray' ) {
 
 									$binaryDataArray = MzML::BinaryDataArray->new();
-									$binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'});
+									$binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'}) if defined ($el4->{'att'}->{'encodedLength'});
 									push(@binarydata, $binaryDataArray);
 
 									my @subnodes_5 = $el4->children;
 
+                                    my @cvparam_el5;
+                                    my @reference_el5;
+                                    my @user_el5;
+
 									for my $el5 ( @subnodes_5 ) {
+                                        #inside binarydataarray
 
-										if ( $el3->name eq 'cvParam' ) {
+										if ( $el5->name eq 'cvParam' ) {
 
-											$cvp = get_cvParam($el3);
-										push(@cvparam_el3, $cvp);
+											my $cvp = get_cvParam($el5);
+                                            push (@cvparam_el5, $cvp);
 
-									    } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+									    } elsif ( $el5->name eq 'referenceableParamGroupRef' ) {
 
-									    	my $ref = get_referenceableParamGroupRef($el3);
-										push(@reference_el3, $ref);
+									    	my $ref = get_referenceableParamGroupRef($el5);
+										    push(@reference_el5, $ref);
 
-									    } elsif ( $el3->name eq 'userParam' ) {
+									    } elsif ( $el5->name eq 'userParam' ) {
 		
-										    my $user = get_userParam($el3);
-										push(@user_el3, $user);
+										    my $user = get_userParam($el5);
+										    push(@user_el5, $user);
 
-									    }
+									    } elsif ( $el5->name eq 'binary' ) {
 
-									}
+                                            $binaryDataArray->binary($el5->text);
+
+                                        }
+
+									}#end el5
+
+                                    $binaryDataArray->cvParam(\@cvparam_el5);
 
 								}
 
