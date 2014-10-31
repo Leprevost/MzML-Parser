@@ -1,10 +1,6 @@
 =head1 NAME
 
-MzML::Parser - The great new MzML::Parser!
-
-=head1 VERSION
-
-Version 0.01
+MzML::Parser - A Perl parser for the mzML data format.
 
 =head1 SYNOPSIS
 
@@ -12,21 +8,40 @@ Quick summary of what the module does.
 
 Perhaps a little code snippet.
 
-    use MzML::Parser;
-
-    my $foo = MzML::Parser->new();
+    my $p = MzML::Parser->new();
+    my $res = $p->parse("miape_sample.mzML");
     ...
 
-=head1 EXPORT
+=head1 DESCRIPTION
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+From 2005-2008 there has existed two separate XML formats for encoding raw spectrometer output: mzData developed by the PSI and mzXML developed at the Seattle Proteome Center at the Institute for Systems Biology. It was recognized that the existence of two separate formats for essentially the same thing generated confusion and required extra programming effort. Therefore the PSI, with full participation by ISB, has developed a new format by taking the best aspects of each of the precursor formats to form a single one. It is intended to replace the previous two formats. This new format was originally given a working name of dataXML. The final name is mzML. The first specification was published in June 2008. This format was officially released at the 2008 American Society for Mass Spectrometry Meeting, and is since then relatively stable with very few updates. On 1 June 2009, mzML 1.1.0 was released.
 
-=head1 SUBROUTINES/METHODS
+The parser will transform the mzML file into a completely structured set of objects, according to the 1.1.0 specification published in L<http://www.peptideatlas.org/tmp/mzML1.1.0.html>.
 
-=head2 function1
+=head2 Object Structure
 
-=head2 function2
+In order to acces the information organized deeply into the nested structure, i suggest to you to use the module Data::Printer. The future versions of this module will have accessors methods to more specifically access some of the information inside the object.
+
+THis is an example of how the object is organized:
+
+	MzML::Registry  {
+	    Parents       Moose::Object
+	    public methods (11) : cvlist, dataProcessingList, fileDescription, instrumentConfigurationList, meta, mzML, referenceableParamGroupList, run, sampleList, scanSettingsList, softwareList
+	    private methods (0)
+	    internals: {
+		cvlist                        MzML::CvList,
+		dataProcessingList            MzML::DataProcessingList,
+		fileDescription               MzML::FileDescription,
+		instrumentConfigurationList   MzML::InstrumentConfigurationList,
+		mzML                          MzML::MzML,
+		referenceableParamGroupList   MzML::ReferenceableParamGroupList,
+		run                           MzML::Run,
+		sampleList                    MzML::SampleList,
+		scanSettingsList              MzML::ScanSettingsList,
+		softwareList                  MzML::SoftwareList
+	    }
+	}
+
 
 =head1 AUTHOR
 
