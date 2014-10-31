@@ -63,6 +63,7 @@ lib/MzML/TargetList.pm
 lib/MzML/UserParam.pm
 Makefile.PL
 MANIFEST			This list of files
+MzML-Parser-0.01.tar.gz
 README
 README.pod
 t/00-load.t
@@ -77,9 +78,6 @@ t/08-softwarelist.t
 t/09-dataprocessing.t
 t/10-run.t
 t/11-scanlist.t
-t/manifest.t
 t/miape_sample.mzML
 t/mzml.xml
-t/pod-coverage.t
-t/pod.t
 t/sample.mzML
