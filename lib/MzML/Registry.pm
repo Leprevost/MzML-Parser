@@ -10,6 +10,7 @@ use MzML::ReferenceableParamGroupList;
 use MzML::SampleList;
 use MzML::InstrumentConfigurationList;
 use MzML::SoftwareList;
+use MzML::ScanSettingsList;
 use MzML::DataProcessingList;
 use MzML::Run;
 
@@ -65,6 +66,15 @@ has 'softwareList' => (
     default => sub {
         my $self = shift;
         return my $obj = MzML::SoftwareList->new();
+        }
+    );
+
+has 'scanSettingsList' => (
+    is  =>  'rw',
+    isa =>  'MzML::ScanSettingsList',
+    default => sub {
+        my $self = shift;
+        return my $obj = MzML::ScanSettingsList->new();
         }
     );
 
