@@ -617,8 +617,6 @@ sub parse_dataproclist {
 sub parse_run {
     my ($parser, $node) = @_;
 
-    use DDP;
-
     my $run = MzML::Run->new();
     $run->defaultInstrumentConfigurationRef($node->{'att'}->{'defaultInstrumentConfigurationRef'});
     $run->id($node->{'att'}->{'id'});
