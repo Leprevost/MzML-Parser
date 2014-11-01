@@ -1,4 +1,4 @@
-package MzML::SourceFileRefList;
+package MzML::ScanSettingsList;
 
 use strict;
 use warnings;
@@ -11,9 +11,9 @@ has 'count' => (
     isa =>  'Int',
     );
 
-has 'sourceFileRef' => (
+has 'scanSettings' => (
     is  =>  'rw',
-    isa =>  'ArrayRef[MzML::SourceFileRef]',
+    isa =>  'ArrayRef[MzML::ScanSettings]',
     );
 
 1;

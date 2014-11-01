@@ -18,9 +18,20 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+	'Moose'			        => 0,
+	'namespace::autoclean' 	=> 0,
+	'XML::Twig'	        	=> 0,
+	'URI'       			=> 0,
     },
+    (! eval { ExtUtils::MakeMaker->VERSION(6.46) } ? () :
+        (META_ADD => {
+    	    resources => {
+                homepage   => 'https://github.com/Leprevost/MzML-Parser',
+                repository => 'https://github.com/Leprevost/MzML-Parser.git',
+                bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=MzML-Parser',
+            },
+        })
+    ),
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'MzML-Parser-*' },
 );

@@ -27,7 +27,7 @@ has 'sourceFileRefList' => (
 has 'targetList' => (
     is  =>  'rw',
     isa =>  'MzML::TargetList',
-    default = sub {
+    default => sub {
         my $self = shift;
         return my $obj = MzML::TargetList->new();
         }

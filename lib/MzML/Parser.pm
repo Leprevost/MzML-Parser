@@ -21,6 +21,8 @@ use MzML::InstrumentConfiguration;
 use MzML::SoftwareList;
 use MzML::Software;
 use MzML::SoftwareParam;
+use MzML::ScanSettingsList;
+use MzML::ScanSettings;
 use MzML::DataProcessingList;
 use MzML::DataProcessing;
 use MzML::ProcessingMethod;
@@ -33,6 +35,9 @@ use MzML::Chromatogram;
 use MzML::Scan;
 use MzML::ScanWindowList;
 use MzML::ScanWindow;
+use MzML::TargetList;
+use MzML::Target;
+use MzML::SourceFileRef;
 use MzML::PrecursorList;
 use MzML::Precursor;
 use MzML::Activation;
@@ -65,6 +70,7 @@ sub parse {
             sampleList                      =>  \&parse_samplelist,
             instrumentConfigurationList     =>  \&parse_intrconflist,
             softwareList                    =>  \&parse_softwarelist,
+            scanSettingsList                =>  \&parse_scansettinglist,
             dataProcessingList              =>  \&parse_dataproclist,
             run                             =>  \&parse_run,
         },
@@ -537,6 +543,147 @@ sub parse_softwarelist {
 
     $reg->softwareList($swl);
 
+}
+
+sub parse_scansettinglist {
+    my ($parser, $node) = @_;
+
+    my $scanSettingsList = MzML::ScanSettingsList->new();
+
+    if ( $node->name eq 'scanSettingsList' ) {
+        
+        $scanSettingsList->count($node->{'att'}->{'count'});
+    }
+
+    my @subnodes_1 = $node->children;
+
+    my $scanSettings;
+    my @scansettingslist;
+
+    for my $el1 ( @subnodes_1 ) {
+
+        if ( $el1->name eq 'scanSettings' ) {
+            #inside scansettings
+            
+            $scanSettings = MzML::ScanSettings->new();
+
+            $scanSettings->id($el1->{'att'}->{'id'});
+
+            my @subnodes_2 = $el1->children;
+
+            my @cvparam_el2;
+            my @reference_el2;
+            my @user_el2;
+
+            my $sourceFileRefList;
+            my $sourceFileRef;
+            my @sourcefilelist;
+
+            my $targetList;
+            my $target;
+            my @targetlist;
+
+            for my $el2 ( @subnodes_2 ) {
+                #inside scansettings tag
+
+                if ( $el2->name eq 'cvParam' ) {
+
+            	    my $cvp = get_cvParam($el2);
+        	        push(@cvparam_el2, $cvp);
+    
+                } elsif ( $el2->name eq 'referenceableParamGroupRef' ) {
+
+                	my $ref = get_referenceableParamGroupRef($el2);
+                	push(@reference_el2, $ref);
+
+                } elsif ( $el2->name eq 'userParam' ) {
+
+                	my $user = get_userParam($el2);
+                	push(@user_el2, $user);
+
+                } elsif ( $el2->name eq 'sourceFileRefList' ) {
+
+                    $sourceFileRefList = MzML::SourceFileRefList->new();
+
+                    my $el3 = $el2->first_child;
+                    
+                    $sourceFileRef = MzML::SourceFileRef->new();
+                    $sourceFileRef->ref($el3->{'att'}->{'ref'});
+
+                    push(@sourcefilelist, $sourceFileRef);
+
+                } elsif ( $el2->name eq 'targetList' ) {
+
+                    $targetList = MzML::TargetList->new();
+                    $targetList->count($el2->{'att'}->{'count'});
+
+                    my @subnodes_3 = $el2->children;
+
+                    for my $el3 ( @subnodes_3 ) {
+                        #inside targetlist tag
+                        
+                        $target = MzML::Target->new();
+
+                        my @cvparam_el4;
+                        my @reference_el4;
+                        my @user_el4;
+
+                        my @subnodes_4 = $el3->children;
+
+                        for my $el4 ( @subnodes_4 ) {
+                            #inside target tag
+                            
+                            if ( $el4->name eq 'cvParam' ) {
+
+                        	    my $cvp = get_cvParam($el4);
+                    	        push(@cvparam_el4, $cvp);
+    
+                            } elsif ( $el4->name eq 'referenceableParamGroupRef' ) {
+
+                            	my $ref = get_referenceableParamGroupRef($el4);
+                            	push(@reference_el4, $ref);
+
+                            } elsif ( $el4->name eq 'userParam' ) {
+
+                            	my $user = get_userParam($el4);
+                            	push(@user_el4, $user);
+
+                            }
+
+                        }#end el4
+
+                        $target->cvParam(\@cvparam_el4);
+                        $target->referenceableParamGroupRef(\@reference_el4);
+                        $target->userParam(\@user_el4);
+
+                        push(@targetlist, $target);
+                        
+                        
+                    }#end el3
+
+                }
+
+            }#end el2
+
+            $targetList->target(\@targetlist);
+            
+            $sourceFileRefList->sourceFileRef(\@sourcefilelist);
+
+            $scanSettings->targetList($targetList);
+            $scanSettings->sourceFileRefList($sourceFileRefList);
+            $scanSettings->cvParam(\@cvparam_el2);
+            $scanSettings->referenceableParamGroupRef(\@reference_el2);
+            $scanSettings->userParam(\@user_el2);
+
+            push(@scansettingslist, $scanSettings);
+
+        }#end el1
+        
+    }
+
+    $scanSettingsList->scanSettings(\@scansettingslist);
+
+    $reg->scanSettingsList($scanSettingsList);
 }
 
 sub parse_dataproclist {
@@ -1032,7 +1179,127 @@ sub parse_run {
         } elsif ( $el1->name eq 'chromatogramList' ) {
             
             $cl = MzML::ChromatogramList->new();
+			$cl->count($el1->{'att'}->{'count'});
+			$cl->defaultDataProcessingRef($el1->{'att'}->{'defaultDataProcessingRef'});
             
+			my @subnodes_2 = $el1->children;
+
+			my @chromatogramlist;
+			my $chromatogram;
+
+			for my $el2 ( @subnodes_2 ) {
+			#inside chromatogramlist tag
+			
+				if ( $el2->name eq 'chromatogram' ) {
+				
+					$chromatogram = MzML::Chromatogram->new();
+
+					$chromatogram->defaultArrayLength($el2->{'att'}->{'defaultArrayLength'}) if defined ($el2->{'att'}->{'defaultArrayLength'});
+					$chromatogram->id($el2->{'att'}->{'id'}) if defined ($el2->{'att'}->{'id'});
+					$chromatogram->index($el2->{'att'}->{'index'}) if defined ($el2->{'att'}->{'index'});
+
+					my @subnodes_3 = $el2->children;
+
+					my @cvparam_el3;
+					my @reference_el3;
+					my @user_el3;
+					
+					my $binaryDataArrayList;
+					my $binaryDataArray;
+					my @binarydata;
+					
+					for my $el3 ( @subnodes_3 ) {
+						#inside chromatogram tag
+
+						if ( $el3->name eq 'cvParam' ) {
+
+							my $cvp = get_cvParam($el3);
+	                        push(@cvparam_el3, $cvp);
+
+	                    } elsif ( $el3->name eq 'referenceableParamGroupRef' ) {
+
+	                    	my $ref = get_referenceableParamGroupRef($el3);
+	                        push(@reference_el3, $ref);
+
+	                    } elsif ( $el3->name eq 'userParam' ) {
+		
+	        	            my $user = get_userParam($el3);
+	                        push(@user_el3, $user);
+
+	                    } elsif ( $el3->name eq 'binaryDataArrayList' ) {
+
+							$binaryDataArrayList = MzML::BinaryDataArrayList->new();
+							$binaryDataArrayList->count($el3->{'att'}->{'count'});
+
+							my @subnodes_4 = $el3->children;
+
+							for my $el4 ( @subnodes_4 ) {
+								#inside binarydataarraylist tag
+
+								if ( $el4->name eq 'binaryDataArray' ) {
+
+									$binaryDataArray = MzML::BinaryDataArray->new();
+									$binaryDataArray->encodedLength($el4->{'att'}->{'encodedLength'}) if defined ($el4->{'att'}->{'encodedLength'});
+									push(@binarydata, $binaryDataArray);
+
+									my @subnodes_5 = $el4->children;
+
+                                    my @cvparam_el5;
+                                    my @reference_el5;
+                                    my @user_el5;
+
+									for my $el5 ( @subnodes_5 ) {
+                                        #inside binarydataarray
+
+										if ( $el5->name eq 'cvParam' ) {
+
+											my $cvp = get_cvParam($el5);
+                                            push (@cvparam_el5, $cvp);
+
+									    } elsif ( $el5->name eq 'referenceableParamGroupRef' ) {
+
+									    	my $ref = get_referenceableParamGroupRef($el5);
+										    push(@reference_el5, $ref);
+
+									    } elsif ( $el5->name eq 'userParam' ) {
+		
+										    my $user = get_userParam($el5);
+										    push(@user_el5, $user);
+
+									    } elsif ( $el5->name eq 'binary' ) {
+
+                                            $binaryDataArray->binary($el5->text);
+
+                                        }
+
+									}#end el5
+
+                                    $binaryDataArray->cvParam(\@cvparam_el5);
+
+								}
+
+
+							}#el4 end
+
+							$binaryDataArrayList->binaryDataArray(\@binarydata);
+
+						}
+
+					}#end el3
+
+					$chromatogram->cvParam(\@cvparam_el3);
+					$chromatogram->referenceableParamGroupRef(\@reference_el3);
+					$chromatogram->userParam(\@user_el3);
+					$chromatogram->binaryDataArrayList($binaryDataArrayList);
+
+					push(@chromatogramlist, $chromatogram);
+
+				}
+
+			}#end el2
+
+			$cl->chromatogram(\@chromatogramlist);
+
         }
 
     }#end el1
