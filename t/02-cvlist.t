@@ -5,7 +5,6 @@ use warnings FATAL => 'all';
 use Test::More;
 use lib 'lib';
 use MzML::Parser;
-use DDP;
 
 plan tests => 3;
 

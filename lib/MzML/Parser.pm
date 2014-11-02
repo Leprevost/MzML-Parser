@@ -49,7 +49,7 @@ use MzML::BinaryDataArray;
 use XML::Twig;
 use URI;
 
-our $VERSION = '0.02';
+our $VERSION = '0.021';
 
 my $reg = MzML::Registry->new();
 
