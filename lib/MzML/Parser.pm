@@ -49,7 +49,7 @@ use MzML::BinaryDataArray;
 use XML::Twig;
 use URI;
 
-our $VERSION = '0.021';
+our $VERSION = '0.1';
 
 my $reg = MzML::Registry->new();
 
@@ -800,6 +800,10 @@ sub parse_run {
             for my $el2 ( @subnodes_2 ) {
                 #inside spectrumlist tag
 
+
+				$cl = MzML::ChromatogramList->new();
+
+
                 if ( $el2->name eq 'spectrum' ) {
 
                     my $spec = MzML::Spectrum->new();
@@ -886,6 +890,8 @@ sub parse_run {
 
                                     for my $el5 ( @subnodes_5 ) {
                                         #inside scan tag
+										
+										$swl = MzML::ScanWindowList->new();
                                       
                                         if ( $el5->name eq 'cvParam' ) {
 
@@ -904,7 +910,6 @@ sub parse_run {
 
                                         } elsif ( $el5->name eq 'scanWindowList' ) {
 
-                                            $swl = MzML::ScanWindowList->new();
                                             $swl->count($el5->{'att'}->{'count'});
 
                                         }
@@ -943,10 +948,11 @@ sub parse_run {
                             for my $el4 ( @subnodes_4 ) {
                                 #inside precursorlist tag
 
+								$precursor = MzML::Precursor->new();
+
                                 if ( $el4->name eq 'precursor' ) {
 
-                                    my $precursor = MzML::Precursor->new();
-                                    $precursor->spectrumRef($el4->{'att'}->{'spectrumRef'});
+                                    $precursor->spectrumRef($el4->{'att'}->{'spectrumRef'}) if defined $el4->{'att'}->{'spectrumRef'};
 
                                     my @subnodes_5 = $el4->children;
 
@@ -962,6 +968,10 @@ sub parse_run {
                                         my (@activation_cvparam, @isolation_cvparam);
                                         my (@activation_reference, @isolation_reference);
                                         my (@activation_user, @isolation_user);
+
+
+										$isolation = MzML::IsolationWindow->new();
+
                                         
                                         if ( $el5->name eq 'activation' ) {
 
@@ -996,8 +1006,6 @@ sub parse_run {
                                             $activation->userParam(\@activation_user);
 
                                         } elsif ( $el5->name eq 'isolationWindow' ) {
-
-                                            $isolation = MzML::IsolationWindow->new();
 
                                             my @subnodes_6 = $el5->children;
 
@@ -1178,7 +1186,7 @@ sub parse_run {
 
         } elsif ( $el1->name eq 'chromatogramList' ) {
             
-            $cl = MzML::ChromatogramList->new();
+            #$cl = MzML::ChromatogramList->new();
 			$cl->count($el1->{'att'}->{'count'});
 			$cl->defaultDataProcessingRef($el1->{'att'}->{'defaultDataProcessingRef'});
             
